@@ -67,7 +67,7 @@ public partial class Window : Form
             }
             if(now>Time)
             {
-                Console.WriteLine(fps);
+                //Console.WriteLine(fps);
                 Time += 1000000000;
                 fps=0;
             }

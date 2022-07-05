@@ -13,7 +13,8 @@ namespace IVKeyPro
         public bool ingame = true;
         // true while playing game
         
-        int[] longnote = {0,0,0,0};
+        int[] longNoteTiming = {0,0,0,0};
+        bool[] isLongNote = {false,false,false,false};
         // the length of 'in judgment' note
 
     
@@ -30,15 +31,19 @@ namespace IVKeyPro
         //double[] test = {300,300,300,300};
 
 
-        /* keys */ public bool[] keydown = {false,false,false,false};
-        /* keys */ public bool[] keyre = {false,false,false,false};
-        /* keys */ public bool[] keyup = {true,true,true,true};
+        /* keys */ public bool[] keyDown = {false,false,false,false};
+        /* keys */ public bool[] keyPress = {false,false,false,false};
+        /* keys */ public bool[] keyUp = {false,false,false,false};
+        /* keys */ public bool[] eventKeyDown = {false,false,false,false};
+        /* keys */ public bool[] eventKeyUp = {false,false,false,false};
+
         double score; int combo;
+        double debug = 0;
         //double hscore;
         int delay = 0;
         int noteCount = 0; public double ms = 0; double starttime;
         //int[,] note = new int[50000,3];
-        double[] acc = {300,300,300,300}; Note[] nextnote = new Note[4];
+        double[] acc = {300,300,300,300}; double[] acc_long = {300,300,300,300}; Note[] nextnote = new Note[4];
         string? songtitle; string? songartist;
 
     }

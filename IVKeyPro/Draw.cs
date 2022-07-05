@@ -12,14 +12,11 @@ using System.Diagnostics;
 using System.Threading;
 
 namespace IVKeyPro
-
 {
-    
     public partial class Window : Form
     {
         public void DrawImage2FloatRectF(PaintEventArgs e)
-        {
-                    
+        {     
             // Create image.
             Image newImage = Image.FromFile("SampImag.jpg");
                     
@@ -34,7 +31,6 @@ namespace IVKeyPro
             // Draw image to screen.
             e.Graphics.DrawImage(newImage, x, y, srcRect, units);
         }
-
         Image img = new Bitmap(1280,720);
         Graphics g;
         public void Draw(){
@@ -52,10 +48,10 @@ namespace IVKeyPro
                     if(item.length == 0){
                         rct.Height = 25;
                     } else {
-                        rct.Height = item.length;
+                        rct.Height = Convert.ToInt32(Math.Round(item.length * besok));
                     }
                     rct.X = 100 * item.line + 200;
-                    rct.Y = Convert.ToInt32(Math.Round((game.ms - item.timing) * besok + 670 - item.length));
+                    rct.Y = Convert.ToInt32(Math.Round((game.ms - item.timing) * besok + 670 - (item.length * besok)));
                     g.FillRectangle(b, rct);
                 }
             }

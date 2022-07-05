@@ -33,9 +33,7 @@ namespace IVKeyPro
                         catch
                         {
                             Console.WriteLine("Note[" + noteCount +"] doesn't fit the standard");
-                            Console.WriteLine("Timing,Line,Length(0 if is not longnote)");
                         }
-
                     }
 
                     if(mode == "info"){

@@ -16,7 +16,6 @@ namespace IVKeyPro
         public int timing;
         public int line;
         public int length;
-
         public void Debug(){
             Console.WriteLine("timing" + timing + "line" + line + "length" + length);
         }

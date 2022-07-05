@@ -5,63 +5,100 @@ namespace IVKeyPro
     public partial class Game
     {
         public void Update (double n){
-            ms = ((n - starttime) / 1000000) - delay - 1000;
+            ms = ((n - starttime) / 1000000) - delay;
+            KeyCheck(true);
             UpdateChunk();
             UpdateAcc();
-            //DoLongNote();
+            DoLongNote();
+            KeyCheck(false);
         }
-
-        public void DoLongNote(){
-            for(int i = 0;i<4;i++){
-                if(longnote[i] != 0){
-                    acc[i] = longnote[i] - ms;
-                    if(keydown[i] == false){
-                        if(acc[i] < 27 && acc[i] > -27){
-                            UpdateLine(nextnote[i]);
-                            Judgement(1);
-                        } else if(acc[i] < 54 && acc[i] > -54){
-                            UpdateLine(nextnote[i]);
-                            Judgement(2);
-
-                        }else if(acc[i] < 105 && acc[i] > -105){
-                            UpdateLine(nextnote[i]);
-                            Judgement(3);
-
-                        }else if(acc[i] < 150 && acc[i] > -150){
-                            UpdateLine(nextnote[i]);
-                            Judgement(4);
-
-                        }else if(acc[i] < 300 && longnote[i] != 0){
-                            UpdateLine(nextnote[i]);
-                            Judgement(0);
-                        }
-
-                        if (acc[i] > 300){
-                        UpdateLine(nextnote[i]);
-                        Judgement(0);
-                        }
+        public void KeyCheck(bool b){
+            if(b)
+            {
+                for(int i = 0;i<4;i++){
+                    if(eventKeyDown[i]){
+                        keyPress[i] = true;
+                        keyDown[i] = true;
+                        eventKeyDown[i] = false;
+                    }
+                    if(eventKeyUp[i]){
+                        keyUp[i] = true;
+                        eventKeyUp[i] = false;
+                        Console.WriteLine("KeyUp");
                     }
                 }
             }
+            if(!b)
+            {
+                for(int i = 0;i<4;i++){
+                    if(keyDown[i] && keyUp[i]){
+                        keyDown[i] = false;
+                    }
+                    keyPress[i] = false;
+                    keyUp[i] = false;
+                }
+            }
+        }
+        public void DoLongNote(){
+            for(int i = 0;i<4;i++){
+                if(isLongNote[i]){
+                    acc_long[i] = nextnote[i].timing + nextnote[i].length - ms;
+                    if(keyUp[i]){
+                        if(acc_long[i] < 25 && acc_long[i] > -25){
+                            CheckLongNote(i);
+                            isLongNote[i] = false;
+                            Judgement(1);
+                        } else if(acc_long[i] < 50 && acc_long[i] > -50){
+                            CheckLongNote(i);
+                            isLongNote[i] = false;
+                            Judgement(2);
 
+                        }else if(acc_long[i] < 75 && acc_long[i] > 75){
+                            CheckLongNote(i);
+                            isLongNote[i] = false;
+                            Judgement(3);
 
+                        }else if(acc_long[i] < 100 && acc_long[i] > -100){
+                            CheckLongNote(i);
+                            isLongNote[i] = false;
+                            Judgement(4);
 
+                        }else if(acc_long[i] > 100){
+                            CheckLongNote(i);
+                            isLongNote[i] = false;
+                            Console.WriteLine("reason 3");
+                            Judgement(0);
+                        }
+                    
+                    if(debug == 0){
+                        debug = ms;
+                        Console.WriteLine(debug);
+                    }
 
+                    if(debug + 50 < ms){
+                        debug += 50;
+                        Console.WriteLine("HI");
+                        Console.WriteLine(acc_long[i]);
+                    }
 
-
+                    }
+                    if (acc_long[i] < -150){
+                        UpdateLine(nextnote[i]);
+                        isLongNote[i] = false;
+                        Console.WriteLine("reason 4");
+                        Judgement(0);
+                    }
+                }
+            }
         }
         public void UpdateLine (Note prevnote)
         {
             spawnedNote.Remove(prevnote);
-            longnote[prevnote.line] = 0;
             foreach (var item in spawnedNote)
             {
                 if(item.line == prevnote.line){
                     nextnote[prevnote.line] = item;
                     //Console.WriteLine("line" + prevnote.line + "updated");
-                    if(item.length>0){
-                        longnote[item.line] = item.timing + item.length;
-                    }
                     break;
                 }
             }
@@ -75,7 +112,8 @@ namespace IVKeyPro
                 if(item.line == i && set == false){
                     nextnote[i] = item;
                     //Console.WriteLine("line" + i + "updated");
-                    set = true;            
+                    set = true;
+                    break;
                 }
             }
             if(set == false){
@@ -87,55 +125,64 @@ namespace IVKeyPro
             {
                 chunkCount ++;
                 foreach(var item in note){
-                    if(item.timing > chunkCount * chunkLength){
+                    if(item.timing < chunkCount * chunkLength){
                         spawnedNote.Add(item);
                     }
                 }
                 note.RemoveAll(spawnedNote.Contains);
-                for(int i = 0;i < 4;i++){UpdateLine(i);}
+                for(int i = 0;i < 4;i++){
+                    UpdateLine(i);
+                }
             }
         }
-
+        public void CheckLongNote(int i) {
+            if(nextnote[i].length > 0 && !isLongNote[i]){
+                isLongNote[i] = true;
+            } else {
+                UpdateLine(nextnote[i]);
+                isLongNote[i] = false;
+            }
+        }
         public void UpdateAcc (){
             for(int i=0;i<4;i++){
             if(nextnote[i] != nullNote){
-                    acc[i] = nextnote[i].timing - ms;
-                    //acc = nextnotetime - time
-                    if(acc[i] < -150){
+                acc[i] = nextnote[i].timing - ms;
+                if(acc[i] < -150 && !isLongNote[i]){
                         //miss
                         UpdateLine(nextnote[i]);
+                        Console.WriteLine("reason 1");
                         Judgement(0);
-                    }
                 }
+            }
                 else
-                {
-                    acc[i] = 300;
-                }
-                if(keydown[i] == true){
+            {
+                acc[i] = 1000;
+            }
+                if(keyPress[i]){
                     if(acc[i] < 25 && acc[i] > -25){
-                        UpdateLine(nextnote[i]);
+                        CheckLongNote(i);
                         Judgement(1);
                     }
                     else if(acc[i] < 50 && acc[i] > -50){
-                        UpdateLine(nextnote[i]);
+                        CheckLongNote(i);
                         Judgement(2);
                     }
-                    else if(acc[i] < 100 && acc[i] > -100){
-                        UpdateLine(nextnote[i]);
+                    else if(acc[i] < 75 && acc[i] > -75){
+                        CheckLongNote(i);
                         Judgement(3);
                     }
-                    else if(acc[i] < 150 && acc[i] > -150){
-                        UpdateLine(nextnote[i]);
+                    else if(acc[i] < 100 && acc[i] > -100){
+                        CheckLongNote(i);
                         Judgement(4);
                     }
-                    else if(acc[i] < 300){
+                    else if(acc[i] < 150){
                         UpdateLine(nextnote[i]);
+                        Console.WriteLine("reason 2");
                         Judgement(0);
                     }
                 }
                 
             }
-            keydown[0] = false; keydown[1] = false; keydown[2] = false; keydown[3] = false;
         }
         public void Judgement(int j){
             if(j != 0){
